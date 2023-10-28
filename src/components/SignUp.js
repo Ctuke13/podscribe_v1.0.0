@@ -1,27 +1,82 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import "../App.css";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 
-function SignUpModal({ onClose }) {
+function SignUpModal({ handleClose, open }) {
+  const modalRef = useRef(null);
+  const modalContentRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (modalRef.current && !modalContentRef.current.contains(e.target)) {
+        console.log("Click was outside the modal content, closing modal.");
+        handleClose();
+      }
+    };
+
+    if (open && modalRef.current) {
+      modalRef.current.addEventListener("click", handleClickOutside);
+    }
+
+    return () => {
+      if (modalRef.current) {
+        modalRef.current.removeEventListener("click", handleClickOutside);
+      }
+    };
+  }, [open, handleClose]);
+
+  const modalClass = open
+    ? "signup-modal-overlay"
+    : "signup-modal-overlay hidden";
+
+  //signing users up
+  const handleSignUp = (e) => {
+    e.preventDefault();
+    const email = e.target.elements.email.value;
+    const password = e.target.elements.password.value;
+
+    const auth = getAuth();
+
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((cred) => {
+        console.log("User Created: ", cred.user);
+        // handleClose();
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  };
+
   return (
-    <div className="signup-modal-overlay">
-      <div className="signup-modal">
-        <button onClick={onClose} className="close-btn">
+    <div className={modalClass} ref={modalRef}>
+      <div
+        className="signup-modal"
+        ref={modalContentRef}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button onClick={handleClose} className="close-btn">
           X
         </button>
         <h2>Sign Up</h2>
-        <form onSubmit={null}>
-          <input type="text" placeholder="First Name" />
-          <input type="text" placeholder="Last Name" />
-          <input type="email" placeholder="Email" />
-          <input type="password" placeholder="Password" />
-          <input type="password" placeholder="Confirm Password" />
-          <input type="text" placeholder="Podcast Name" />
-          <select>
+        <form className="sign-up" onSubmit={handleSignUp}>
+          <input name="firstName" type="text" placeholder="First Name" />
+          <input name="lastName" type="text" placeholder="Last Name" />
+          <input name="email" type="email" placeholder="Email" />
+          <input name="password" type="password" placeholder="Password" />
+          <input
+            name="confirmPassword"
+            type="password"
+            placeholder="Confirm Password"
+          />
+          <input name="podName" type="text" placeholder="Podcast Name" />
+          <select name="genre">
             <option value="">Select Genre</option>
             <option value="tech">Tech</option>
-            <option value="tech">Music</option>
-            <option value="tech">Sports</option>
-            <option value="tech">Politics</option>
+            <option value="music">Music</option>
+            <option value="sports">Sports</option>
+            <option value="politics">Politics</option>
+            <option value="other">Other</option>
             {/* Add other genres as needed */}
           </select>
           <button type="submit">Register</button>

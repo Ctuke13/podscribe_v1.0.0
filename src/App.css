@@ -206,3 +206,9 @@ import .App {
   cursor: pointer;
   font-size: 1.5rem;
 }
+
+/***** SIGN UP MODAL*****/
+.signup-modal-overlay.hidden {
+  display: none;
+}
+/****/

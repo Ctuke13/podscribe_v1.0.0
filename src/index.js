@@ -1,10 +1,27 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./index.css";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const firebaseConfig = {
+  apiKey: "AIzaSyDgu9I96686MVnkz88LnsieDBYpPgJA4ZY",
+  authDomain: "podscribe-6d1b6.firebaseapp.com",
+  projectId: "podscribe-6d1b6",
+  storageBucket: "podscribe-6d1b6.appspot.com",
+  messagingSenderId: "979159090189",
+  appId: "1:979159090189:web:a2fa0a6ebb7672b48e4144",
+};
+
+// init firebase
+initializeApp(firebaseConfig);
+
+// init services
+const db = getFirestore();
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <App />
