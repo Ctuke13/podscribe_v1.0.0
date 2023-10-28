@@ -17,8 +17,9 @@ import GoogleButton from 'react-google-button'
 import SignUpModal from './SignUp'
 import { useState } from 'react'
 import logo from '../images/logo.png'
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'
 import { useNavigate } from 'react-router-dom'
+import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth'
+import { db } from '../firebase'
 
 function Copyright(props) {
   return (
@@ -37,9 +38,32 @@ function Copyright(props) {
 
 const defaultTheme = createTheme()
 
-export default function SignIn() {
-  const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false)
+export default function Register() {
   const navigate = useNavigate()
+  const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false)
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  })
+  const { email, password } = formData
+  const onChange = (evt) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      [evt.target.id]: evt.target.value,
+    }))
+  }
+
+  const onSubmit = async (evt) => {
+    evt.preventDefault()
+    try {
+      const auth = getAuth()
+      const userCred = await createUserWithEmailAndPassword(auth, email, password)
+      const user = userCred.user
+      navigate('/home')
+    } catch (error) {
+      console.log('ERROR ONSUBMIT', error)
+    }
+  }
 
   // const handleOpenSignUpModal = () => {
   //   setIsSignUpModalOpen(true)
@@ -49,27 +73,14 @@ export default function SignIn() {
   //   setIsSignUpModalOpen(false)
   // }
 
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-    try {
-      const data = new FormData(event.currentTarget)
-      console.log({
-        email: data.get('email'),
-        password: data.get('password'),
-      })
-      const auth = getAuth()
-      const userCred = await signInWithEmailAndPassword(
-        auth,
-        data.get('email'),
-        data.get('password')
-      )
-      if (userCred.user) {
-        navigate('/home')
-      }
-    } catch (error) {
-      console.log('ERROR SIGNIN', error)
-    }
-  }
+  // const handleSubmit = (event) => {
+  //   event.preventDefault()
+  //   const data = new FormData(event.currentTarget)
+  //   console.log({
+  //     email: data.get('email'),
+  //     password: data.get('password'),
+  //   })
+  // }
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -104,7 +115,7 @@ export default function SignIn() {
             {/* <Typography component="h1" variant="h5">
               Sign in
             </Typography> */}
-            <Box component='form' noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+            <Box component='form' noValidate onSubmit={onSubmit} sx={{ mt: 1 }}>
               <TextField
                 margin='normal'
                 required
@@ -114,6 +125,8 @@ export default function SignIn() {
                 name='email'
                 autoComplete='email'
                 autoFocus
+                value={email}
+                onChange={onChange}
               />
               <TextField
                 margin='normal'
@@ -124,13 +137,15 @@ export default function SignIn() {
                 type='password'
                 id='password'
                 autoComplete='current-password'
+                value={password}
+                onChange={onChange}
               />
               <FormControlLabel
                 control={<Checkbox value='remember' color='primary' />}
                 label='Remember me'
               />
               <Button type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2 }}>
-                Sign In
+                Register
               </Button>
               <GoogleButton
                 onClick={() => {
@@ -144,13 +159,13 @@ export default function SignIn() {
                   </Link>
                 </Grid>
                 <Grid item>
-                  <Link href='/register' variant='body2'>
-                    {"Don't have an account? Register"}
+                  <Link href='/' variant='body2'>
+                    {'Already have an account? Sign In'}
                   </Link>
                 </Grid>
               </Grid>
-              {/* <SignUpModal open={isSignUpModalOpen} handleClose={handleCloseSignUpModal} />
-              <Copyright sx={{ mt: 5 }} /> */}
+              {/* <SignUpModal open={isSignUpModalOpen} handleClose={handleCloseSignUpModal} /> */}
+              <Copyright sx={{ mt: 5 }} />
             </Box>
           </Box>
         </Grid>
