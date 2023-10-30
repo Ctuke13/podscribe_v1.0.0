@@ -1,7 +1,6 @@
 import React from "react";
 import "../App.css";
-import SearchBar from "../components/SearchBar";
-import NavBar from "../components/NavBar";
+
 import "@fontsource/inter";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";

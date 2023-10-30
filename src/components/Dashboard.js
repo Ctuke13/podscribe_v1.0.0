@@ -17,7 +17,13 @@ import Link from "@mui/material/Link";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import LogoutIcon from "@mui/icons-material/Logout";
+import Tooltip from "@mui/material/Tooltip";
 import { mainListItems, secondaryListItems } from "./listItems";
+import Modal from "@mui/material/Modal";
+import Button from "@mui/material/Button";
+import { signOut, getAuth } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 function Copyright(props) {
   return (
@@ -87,16 +93,72 @@ const Drawer = styled(MuiDrawer, {
 const defaultTheme = createTheme();
 
 export default function Dashboard() {
-  const [open, setOpen] = React.useState(true);
+  const navigate = useNavigate();
+  const [drawer, setDrawer] = React.useState(false);
+  const [openLogOut, setOpenLogOut] = React.useState(false);
   const toggleDrawer = () => {
-    setOpen(!open);
+    setDrawer(!drawer);
+  };
+  const handleOpenLogOut = () => setOpenLogOut(true);
+  const handleCloseLogOut = () => setOpenLogOut(false);
+
+  const logOut = function (e) {
+    const auth = getAuth();
+    signOut(auth)
+      .then(() => {
+        console.log("the user signed out");
+        navigate("/");
+      })
+      .catch((err) => {
+        console.log("LOGOUT ERROR: ", err.message);
+      });
+  };
+
+  const style = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 400,
+    bgcolor: "background.paper",
+    border: "2px solid indigo",
+    boxShadow: 24,
+    p: 4,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
   };
 
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
+        <Modal
+          open={openLogOut}
+          onClose={handleCloseLogOut}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box sx={style}>
+            <Typography
+              id="modal-modal-title"
+              variant="h4"
+              component="h1"
+              sx={{ mb: 2 }}
+            >
+              Are you sure you want to Log Out?
+            </Typography>
+            <Box sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
+              <Button variant="outlined" onClick={logOut}>
+                LOGOUT
+              </Button>
+              <Button variant="outlined" onClick={handleCloseLogOut}>
+                CANCEL
+              </Button>
+            </Box>
+          </Box>
+        </Modal>
         <CssBaseline />
-        <AppBar position="absolute" open={open}>
+        <AppBar position="absolute" open={drawer}>
           <Toolbar
             sx={{
               pr: "24px", // keep right padding when drawer closed
@@ -109,7 +171,7 @@ export default function Dashboard() {
               onClick={toggleDrawer}
               sx={{
                 marginRight: "36px",
-                ...(open && { display: "none" }),
+                ...(drawer && { display: "none" }),
               }}
             >
               <MenuIcon />
@@ -123,14 +185,25 @@ export default function Dashboard() {
             >
               PodScribe
             </Typography>
-            <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
+            <Tooltip title="Notifications">
+              <IconButton color="inherit" sx={{ marginRight: 4 }}>
+                <Badge badgeContent={4} color="secondary">
+                  <NotificationsIcon />
+                </Badge>
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Log Out">
+              <IconButton
+                onClick={handleOpenLogOut}
+                color="inherit"
+                sx={{ marginRight: 2 }}
+              >
+                <LogoutIcon />
+              </IconButton>
+            </Tooltip>
           </Toolbar>
         </AppBar>
-        <Drawer variant="permanent" open={open}>
+        <Drawer variant="permanent" open={drawer}>
           <Toolbar
             sx={{
               display: "flex",

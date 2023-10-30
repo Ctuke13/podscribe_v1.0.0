@@ -1,5 +1,4 @@
 import * as React from "react";
-import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
@@ -9,14 +8,14 @@ import Link from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import micBg from "../images/mic_bg.jpg";
 import GoogleButton from "react-google-button";
-import SignUpModal from "./SignUp";
 import { useState } from "react";
 import logo from "../images/logo.png";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 function Copyright(props) {
   return (
@@ -36,28 +35,40 @@ function Copyright(props) {
   );
 }
 
-// TODO remove, this demo shouldn't need to reset the theme.
-
 const defaultTheme = createTheme();
 
 export default function SignIn() {
-  const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
+  const navigate = useNavigate();
 
-  const handleOpenSignUpModal = () => {
-    setIsSignUpModalOpen(true);
-  };
+  // const handleOpenSignUpModal = () => {
+  //   setIsSignUpModalOpen(true)
+  // }
 
-  const handleCloseSignUpModal = () => {
-    setIsSignUpModalOpen(false);
-  };
+  // const handleCloseSignUpModal = () => {
+  //   setIsSignUpModalOpen(false)
+  // }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+    try {
+      const data = new FormData(event.currentTarget);
+      console.log(data);
+      console.log({
+        email: data.get("email"),
+        password: data.get("password"),
+      });
+      const auth = getAuth();
+      const userCred = await signInWithEmailAndPassword(
+        auth,
+        data.get("email"),
+        data.get("password")
+      );
+      if (userCred.user) {
+        navigate("/home");
+      }
+    } catch (error) {
+      console.log("ERROR SIGNIN", error);
+    }
   };
 
   return (
@@ -145,20 +156,13 @@ export default function SignIn() {
                   </Link>
                 </Grid>
                 <Grid item>
-                  <Link
-                    href="#"
-                    variant="body2"
-                    onClick={handleOpenSignUpModal}
-                  >
-                    {"Don't have an account? Sign Up"}
+                  <Link href="/register" variant="body2">
+                    {"Don't have an account? Register"}
                   </Link>
                 </Grid>
               </Grid>
-              <SignUpModal
-                open={isSignUpModalOpen}
-                handleClose={handleCloseSignUpModal}
-              />
-              <Copyright sx={{ mt: 5 }} />
+              {/* <SignUpModal open={isSignUpModalOpen} handleClose={handleCloseSignUpModal} />
+              <Copyright sx={{ mt: 5 }} /> */}
             </Box>
           </Box>
         </Grid>
