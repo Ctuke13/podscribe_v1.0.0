@@ -16,6 +16,7 @@ import { useState } from "react";
 import logo from "../images/logo.png";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 function Copyright(props) {
   return (
@@ -39,14 +40,6 @@ const defaultTheme = createTheme();
 
 export default function SignIn() {
   const navigate = useNavigate();
-
-  // const handleOpenSignUpModal = () => {
-  //   setIsSignUpModalOpen(true)
-  // }
-
-  // const handleCloseSignUpModal = () => {
-  //   setIsSignUpModalOpen(false)
-  // }
 
   const handleSubmit = async (event) => {
     event.preventDefault();

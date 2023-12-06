@@ -24,6 +24,8 @@ import Modal from "@mui/material/Modal";
 import Button from "@mui/material/Button";
 import { signOut, getAuth } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function Copyright(props) {
   return (
@@ -104,9 +106,21 @@ export default function Dashboard() {
 
   const logOut = function (e) {
     const auth = getAuth();
+
     signOut(auth)
       .then(() => {
-        console.log("the user signed out");
+        const notify = () =>
+          toast.info("The user signed out", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+        notify();
         navigate("/");
       })
       .catch((err) => {
@@ -158,6 +172,20 @@ export default function Dashboard() {
           </Box>
         </Modal>
         <CssBaseline />
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
+        {/* Same as */}
+        <ToastContainer />
         <AppBar position="absolute" open={drawer}>
           <Toolbar
             sx={{

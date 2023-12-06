@@ -10,20 +10,30 @@ import Link from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import micBg from "../images/mic_bg.jpg";
 import GoogleButton from "react-google-button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import logo from "../images/logo.png";
 import { useNavigate } from "react-router-dom";
-import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  getAuth,
+  GoogleAuthProvider,
+} from "firebase/auth";
+import { auth } from "../firebase";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
+import firebase from "firebase/compat/app";
+import "firebase/compat/auth";
+import "firebase/compat/firestore";
+import { addDoc, collection } from "firebase/firestore";
 import { db } from "../firebase";
+import { googleSignIn } from "./GoogleSignIn";
+import { useAuth } from "../contexts/AuthContext";
 
 function Copyright(props) {
   return (
@@ -56,10 +66,12 @@ export default function Register() {
     password: "",
     confirmPassword: "",
   });
+  const [value, setValue] = useState("");
+  const { signUp } = useAuth;
 
   const validationSchema = Yup.object({
     podcastName: Yup.string().required("Podcast Name is required"),
-    genre: Yup.number().required("Genre is required"),
+    genre: Yup.string().required("Genre is required"),
     fName: Yup.string().required("First Name is required"),
     lName: Yup.string().required("Last Name is required"),
     email: Yup.string()
@@ -93,14 +105,26 @@ export default function Register() {
       await validationSchema.validate(formData, { abortEarly: false });
 
       //If validation passed, proceed with registration
-      const auth = getAuth();
       const userCred = await createUserWithEmailAndPassword(
         auth,
         email,
         password
       );
-      const user = userCred.user;
-      console.log(user);
+
+      console.log(db);
+      const userUid = userCred.user.uid;
+
+      const userData = {
+        podcastName: podcastName,
+        genre: genre,
+        fName: fName,
+        lName: lName,
+        email: email,
+      };
+
+      const docRef = await addDoc(collection(db, "users"), userData);
+
+      console.log("User registration successful: ", userCred.user);
       navigate("/home");
     } catch (error) {
       if (error instanceof Yup.ValidationError) {
@@ -115,6 +139,18 @@ export default function Register() {
       }
     }
   };
+
+  // const auth = getAuth();
+  // const provider = new GoogleAuthProvider();
+  // const googleSignIn = () => {
+  //   signInWithPopup(auth, provider)
+  //     .then((data) => {
+  //       console.log(data);
+  //     })
+  //     .catch((err) => {
+  //       console.log(err);
+  //     });
+  // };
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -174,34 +210,41 @@ export default function Register() {
                   name="genre"
                   onChange={onChange}
                 >
-                  <MenuItem value={1}>Arts</MenuItem>
-                  <MenuItem value={2}>Business</MenuItem>
-                  <MenuItem value={3}>Comedy</MenuItem>
-                  <MenuItem value={4}>Crime</MenuItem>
-                  <MenuItem value={5}>Educational</MenuItem>
-                  <MenuItem value={6}>Entertainment</MenuItem>
-                  <MenuItem value={7}>Fiction</MenuItem>
-                  <MenuItem value={8}>Finance</MenuItem>
-                  <MenuItem value={9}>Film & TV</MenuItem>
-                  <MenuItem value={10}>Gaming</MenuItem>
-                  <MenuItem value={11}>Health & Fitness</MenuItem>
-                  <MenuItem value={12}>History</MenuItem>
-                  <MenuItem value={13}>Journalism</MenuItem>
-                  <MenuItem value={14}>Kids</MenuItem>
-                  <MenuItem value={15}>Law</MenuItem>
-                  <MenuItem value={16}>Music</MenuItem>
-                  <MenuItem value={17}>News & Politics</MenuItem>
-                  <MenuItem value={18}>Non-Fiction</MenuItem>
-                  <MenuItem value={19}>Parenting</MenuItem>
-                  <MenuItem value={20}>Philosophy</MenuItem>
-                  <MenuItem value={21}>Pop Culture</MenuItem>
-                  <MenuItem value={22}>Religion</MenuItem>
-                  <MenuItem value={23}>Science</MenuItem>
-                  <MenuItem value={24}>Self-Improvement</MenuItem>
-                  <MenuItem value={25}>Society & Culture</MenuItem>
-                  <MenuItem value={26}>Spirituality</MenuItem>
-                  <MenuItem value={27}>Sports</MenuItem>
-                  <MenuItem value={28}>Tech</MenuItem>
+                  <MenuItem value={"Arts"}>Arts</MenuItem>
+                  <MenuItem value={"Business & Finance"}>
+                    Business & Finance
+                  </MenuItem>
+                  <MenuItem value={"Comedy"}>Comedy</MenuItem>
+                  <MenuItem value={"Crime"}>Crime</MenuItem>
+                  <MenuItem value={"Educational"}>Educational</MenuItem>
+                  <MenuItem value={"Entertainment"}>Entertainment</MenuItem>
+                  <MenuItem value={"Fiction"}>Fiction</MenuItem>
+                  <MenuItem value={"Film & TV"}>Film & TV</MenuItem>
+                  <MenuItem value={"Gaming"}>Gaming</MenuItem>
+                  <MenuItem value={"Health & Fitness"}>
+                    Health & Fitness
+                  </MenuItem>
+                  <MenuItem value={"History"}>History</MenuItem>
+                  <MenuItem value={"Journalism"}>Journalism</MenuItem>
+                  <MenuItem value={"Kids"}>Kids</MenuItem>
+                  <MenuItem value={"Law"}>Law</MenuItem>
+                  <MenuItem value={"Music"}>Music</MenuItem>
+                  <MenuItem value={"News & Politics"}>News & Politics</MenuItem>
+                  <MenuItem value={"Non-Fiction"}>Non-Fiction</MenuItem>
+                  <MenuItem value={"Parenting"}>Parenting</MenuItem>
+                  <MenuItem value={"Philosophy"}>Philosophy</MenuItem>
+                  <MenuItem value={"Pop Culture"}>Pop Culture</MenuItem>
+                  <MenuItem value={"Religion"}>Religion</MenuItem>
+                  <MenuItem value={"Science"}>Science</MenuItem>
+                  <MenuItem value={"Self-Improvement"}>
+                    Self-Improvement
+                  </MenuItem>
+                  <MenuItem value={"Society & Culture"}>
+                    Society & Culture
+                  </MenuItem>
+                  <MenuItem value={"Spirituality"}>Spirituality</MenuItem>
+                  <MenuItem value={"Sports"}>Sports</MenuItem>
+                  <MenuItem value={"Tech"}>Tech</MenuItem>
                 </Select>
               </FormControl>
               <TextField
@@ -275,11 +318,7 @@ export default function Register() {
               >
                 Register
               </Button>
-              <GoogleButton
-                onClick={() => {
-                  console.log("Google Button Clicked!");
-                }}
-              />
+              <GoogleButton onClick={googleSignIn} />
               <Grid container>
                 <Grid item xs>
                   <Link href="#" variant="body2">
