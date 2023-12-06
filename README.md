@@ -15,3 +15,4 @@ Podcribe is an application to transcribe podcast and summarize into timestamps.
 
 - [x] Firebase Authentication Flow
 - [ ] Upload Audio File
+- [ ]
