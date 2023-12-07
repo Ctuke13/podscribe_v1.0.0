@@ -56,6 +56,7 @@ export default function SignIn() {
         data.get("email"),
         data.get("password")
       );
+      console.log(userCred);
       if (userCred.user) {
         navigate("/home");
       }
