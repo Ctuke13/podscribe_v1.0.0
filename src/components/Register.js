@@ -22,16 +22,15 @@ import {
   getAuth,
   GoogleAuthProvider,
 } from "firebase/auth";
-import { auth } from "../firebase";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
-import firebase from "firebase/compat/app";
-import "firebase/compat/auth";
-import "firebase/compat/firestore";
-import { addDoc, collection } from "firebase/firestore";
-import { db } from "../firebase";
+// import firebase from "firebase/compat/app";
+// import "firebase/compat/auth";
+// import "firebase/compat/firestore";
+import { setDoc, getDoc, addDoc, collection, doc } from "firebase/firestore";
+import { db, auth } from "../firebase";
 import { googleSignIn } from "./GoogleSignIn";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -55,8 +54,9 @@ function Copyright(props) {
 
 const defaultTheme = createTheme();
 
-export default function Register() {
+export default function Register(props) {
   const navigate = useNavigate();
+  const { currentUser, userId, signUp } = useAuth();
   const [formData, setFormData] = useState({
     podcastName: "",
     genre: "",
@@ -66,8 +66,6 @@ export default function Register() {
     password: "",
     confirmPassword: "",
   });
-  const [value, setValue] = useState("");
-  const { signUp } = useAuth;
 
   const validationSchema = Yup.object({
     podcastName: Yup.string().required("Podcast Name is required"),
@@ -96,24 +94,19 @@ export default function Register() {
       ...prevState,
       [name]: value,
     }));
-    console.log(formData);
   };
 
   const onSubmit = async (evt) => {
     evt.preventDefault();
+
     try {
       await validationSchema.validate(formData, { abortEarly: false });
 
       //If validation passed, proceed with registration
-      const userCred = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+      const userCred = await signUp(email, password);
 
-      console.log(db);
       const userUid = userCred.user.uid;
-
+      console.log(userUid);
       const userData = {
         podcastName: podcastName,
         genre: genre,
@@ -122,7 +115,9 @@ export default function Register() {
         email: email,
       };
 
-      const docRef = await addDoc(collection(db, "users"), userData);
+      // const docRef = await addDoc(collection(db, "users"), userData);
+      const docRef = doc(db, "users", userUid);
+      await setDoc(docRef, userData);
 
       console.log("User registration successful: ", userCred.user);
       navigate("/home");
