@@ -9,6 +9,7 @@ Podcribe is an application to transcribe podcast and summarize into timestamps.
   - Auth
   - Hosting
   - Firestore
+- Recoil
 - MUI
 
 ### MVP
